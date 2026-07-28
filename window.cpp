@@ -72,6 +72,6 @@ VertexOutput Window::vertexShader(const VertexInput& in) {
     return out;
 }
 Vector4 Window::fragmentShader(const FragmentInput& in) {
-    double alpha = in.color.w * 0.5;
+    float alpha = in.color.w * 0.5;
     return Vector4{ in.color.x, in.color.y, in.color.z, alpha };
 }

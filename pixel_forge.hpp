@@ -23,10 +23,7 @@ typedef struct {
 
 class PixelForge {
 public:
-    PixelForge();
-    ~PixelForge();
-
-    bool init(const char* title, int width, int height);
+    bool init(const char* title, int width, int height, SDL_WindowFlags flags);
     void run();
 
     void setVertexShader(std::function<VertexOutput(const VertexInput&)> vs);
@@ -40,11 +37,13 @@ public:
     void renderTransparentsTriangles(const std::vector<std::vector<VertexInput>*>& meshes, const Matrix4& view, const Matrix4& model);
 
     void setWindowPosition(int x, int y);
+    void setWindowSize(int x, int y);
+    void setTitle(const char* title);
     void setViewport(XY& start, XY& end);
 
     XY getWindowPosition();
-    int getWidth();
-    int getHeight();
+    inline int getWidth();
+    inline int getHeight();
     int getGWidth();
     int getGHeight();
     int getActiveMonitorId();
@@ -65,17 +64,22 @@ protected:
     virtual void mouseMove();
     virtual void mouseWheel(float offset);
 private:
-    void rasterizeTriangle(const VertexOutput& v0, const VertexOutput& v1, const VertexOutput& v2);
+    void rasterizeTriangleSSE(const VertexOutput& v0, const VertexOutput& v1, const VertexOutput& v2);
+    void rasterizeTriangleAVX(const VertexOutput& v0, const VertexOutput& v1, const VertexOutput& v2);
 
     SDL_Window* window = nullptr;
     SDL_Surface* surface = nullptr;
     SDL_Rect displayRect;
+
     std::vector<float> zBuffer;
     int gWidth = 0;
     int gHeight = 0;
+
     bool isOpaqueRender = true;
     XY viewportSizeStart{ 0,0 };
     XY viewportSizeEnd{ 0,0 };
+
+    bool hasAVX;
 
     std::function<VertexOutput(const VertexInput&)> vertexShader = nullptr;
     std::function<Vector4(const FragmentInput&)> fragmentShader = nullptr;

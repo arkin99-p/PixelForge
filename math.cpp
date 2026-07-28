@@ -1,9 +1,11 @@
 #include <cmath>
 #include <format>
+#include <xmmintrin.h>
+#include <smmintrin.h>
 #include "math.hpp"
 
 Vector2::Vector2() : x(0), y(0) {}
-Vector2::Vector2(double x, double y) : x(x), y(y) {}
+Vector2::Vector2(float x, float y) : x(x), y(y) {}
 void Vector2::add(const Vector2& v) {
     x += v.x;
     y += v.y;
@@ -12,11 +14,11 @@ void Vector2::sub(const Vector2& v) {
     x -= v.x;
     y -= v.y;
 }
-void Vector2::scale(double factor) {
+void Vector2::scale(float factor) {
     x *= factor;
     y *= factor;
 }
-double Vector2::length() const noexcept {
+float Vector2::length() const noexcept {
     return std::sqrt(x * x + y * y);
 }
 std::string Vector2::toString() const {
@@ -28,19 +30,19 @@ Vector2 Vector2::operator+(const Vector2& other) const {
 Vector2 Vector2::operator-(const Vector2& other) const {
     return Vector2(x - other.x, y - other.y);
 }
-Vector2 Vector2::operator*(double factor) const {
+Vector2 Vector2::operator*(float factor) const {
     return Vector2(x * factor, y * factor);
 }
-Vector2 Vector2::operator/(double factor) const {
+Vector2 Vector2::operator/(float factor) const {
     return Vector2(x / factor, y / factor);
 }
-double Vector2::operator*(const Vector2& other) const {
+float Vector2::operator*(const Vector2& other) const {
     return x * other.x + y * other.y;
 }
 
 Vector3::Vector3() : x(0), y(0), z(0) {}
-Vector3::Vector3(double x, double y, double z) : x(x), y(y), z(z) {}
-Vector3::Vector3(Vector2 vector, double z) : x(vector.x), y(vector.y), z(z) {}
+Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
+Vector3::Vector3(Vector2 vector, float z) : x(vector.x), y(vector.y), z(z) {}
 void Vector3::add(const Vector3& v) {
     x += v.x;
     y += v.y;
@@ -52,17 +54,17 @@ void Vector3::sub(const Vector3& v) {
     z -= v.z;
 }
 void Vector3::crossWith(const Vector3& v) {
-    double oldX = x, oldY = y, oldZ = z;
+    float oldX = x, oldY = y, oldZ = z;
     x = oldY * v.z - oldZ * v.y;
     y = oldZ * v.x - oldX * v.z;
     z = oldX * v.y - oldY * v.x;
 }
-void Vector3::scale(double factor) {
+void Vector3::scale(float factor) {
     x *= factor;
     y *= factor;
     z *= factor;
 }
-double Vector3::length() const noexcept {
+float Vector3::length() const noexcept {
     return std::sqrt(x * x + y * y + z * z);
 }
 std::string Vector3::toString() const {
@@ -74,19 +76,19 @@ Vector3 Vector3::operator+(const Vector3& other) const {
 Vector3 Vector3::operator-(const Vector3& other) const {
     return Vector3(x - other.x, y - other.y, z - other.z);
 }
-double Vector3::operator*(const Vector3& other) const {
+float Vector3::operator*(const Vector3& other) const {
     return x * other.x + y * other.y + z * other.z;
 }
-Vector3 Vector3::operator*(double factor) const {
+Vector3 Vector3::operator*(float factor) const {
     return Vector3(x * factor, y * factor, z * factor);
 }
-Vector3 Vector3::operator/(double factor) const {
+Vector3 Vector3::operator/(float factor) const {
     return Vector3(x / factor, y / factor, z / factor);
 }
 
 Vector4::Vector4() : x(0), y(0), z(0), w(0) {}
-Vector4::Vector4(double x, double y, double z, double w) : x(x), y(y), z(z), w(w) {}
-Vector4::Vector4(Vector3 vector, double w) : x(vector.x), y(vector.y), z(vector.z), w(w) {}
+Vector4::Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+Vector4::Vector4(Vector3 vector, float w) : x(vector.x), y(vector.y), z(vector.z), w(w) {}
 void Vector4::add(const Vector4& v) {
     x += v.x;
     y += v.y;
@@ -99,13 +101,13 @@ void Vector4::sub(const Vector4& v) {
     z -= v.z;
     w -= v.w;
 }
-void Vector4::scale(double factor) {
+void Vector4::scale(float factor) {
     x *= factor;
     y *= factor;
     z *= factor;
     w *= factor;
 }
-double Vector4::length() const noexcept {
+float Vector4::length() const noexcept {
     return std::sqrt(x * x + y * y + z * z + w * w);
 }
 std::string Vector4::toString() const {
@@ -117,13 +119,13 @@ Vector4 Vector4::operator+(const Vector4& other) const {
 Vector4 Vector4::operator-(const Vector4& other) const {
     return Vector4(x - other.x, y - other.y, z - other.z, w - other.w);
 }
-double Vector4::operator*(const Vector4& other) const {
+float Vector4::operator*(const Vector4& other) const {
     return x * other.x + y * other.y + z * other.z + w * other.w;
 }
-Vector4 Vector4::operator*(double factor) const {
+Vector4 Vector4::operator*(float factor) const {
     return Vector4(x * factor, y * factor, z * factor, w * factor);
 }
-Vector4 Vector4::operator/(double factor) const {
+Vector4 Vector4::operator/(float factor) const {
     return Vector4(x / factor, y / factor, z / factor, w / factor);
 }
 
@@ -140,9 +142,9 @@ Matrix3::Matrix3() {
     m[2][1] = 0;
     m[2][2] = 1;
 }
-Matrix3::Matrix3(double a11, double a12, double a13,
-    double a21, double a22, double a23,
-    double a31, double a32, double a33) {
+Matrix3::Matrix3(float a11, float a12, float a13,
+    float a21, float a22, float a23,
+    float a31, float a32, float a33) {
     m[0][0] = a11;
     m[0][1] = a12;
     m[0][2] = a13;
@@ -183,21 +185,21 @@ Vector3 Matrix3::operator*(const Vector3& v) const {
         m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z
     };
 }
-Matrix3 Matrix3::rotation(double angle) {
+Matrix3 Matrix3::rotation(float angle) {
     return Matrix3{
         std::cos(angle), -std::sin(angle), 0,
         std::sin(angle), std::cos(angle), 0,
         0, 0, 1
     };
 }
-Matrix3 Matrix3::scale(double sx, double sy) {
+Matrix3 Matrix3::scale(float sx, float sy) {
     return Matrix3{
         sx, 0, 0,
         0, sy, 0,
         0, 0, 1
     };
 }
-Matrix3 Matrix3::translation(double tx, double ty) {
+Matrix3 Matrix3::translation(float tx, float ty) {
     return Matrix3{
         1, 0, tx,
         0, 1, ty,
@@ -232,10 +234,10 @@ Matrix4::Matrix4() {
     m[3][2] = 0;
     m[3][3] = 1;
 }
-Matrix4::Matrix4(double a11, double a12, double a13, double a14,
-    double a21, double a22, double a23, double a24,
-    double a31, double a32, double a33, double a34,
-    double a41, double a42, double a43, double a44) {
+Matrix4::Matrix4(float a11, float a12, float a13, float a14,
+    float a21, float a22, float a23, float a24,
+    float a31, float a32, float a33, float a34,
+    float a41, float a42, float a43, float a44) {
     m[0][0] = a11;
     m[0][1] = a12;
     m[0][2] = a13;
@@ -265,35 +267,53 @@ Vector3 Matrix4::transformDirection(const Vector3& v) const {
     return Vector3(result.x, result.y, result.z);
 }
 Matrix4 Matrix4::operator*(const Matrix4& other) const {
-    return Matrix4{
-        m[0][0] * other.m[0][0] + m[0][1] * other.m[1][0] + m[0][2] * other.m[2][0] + m[0][3] * other.m[3][0],
-        m[0][0] * other.m[0][1] + m[0][1] * other.m[1][1] + m[0][2] * other.m[2][1] + m[0][3] * other.m[3][1],
-        m[0][0] * other.m[0][2] + m[0][1] * other.m[1][2] + m[0][2] * other.m[2][2] + m[0][3] * other.m[3][2],
-        m[0][0] * other.m[0][3] + m[0][1] * other.m[1][3] + m[0][2] * other.m[2][3] + m[0][3] * other.m[3][3],
+    Matrix4 result;
 
-        m[1][0] * other.m[0][0] + m[1][1] * other.m[1][0] + m[1][2] * other.m[2][0] + m[1][3] * other.m[3][0],
-        m[1][0] * other.m[0][1] + m[1][1] * other.m[1][1] + m[1][2] * other.m[2][1] + m[1][3] * other.m[3][1],
-        m[1][0] * other.m[0][2] + m[1][1] * other.m[1][2] + m[1][2] * other.m[2][2] + m[1][3] * other.m[3][2],
-        m[1][0] * other.m[0][3] + m[1][1] * other.m[1][3] + m[1][2] * other.m[2][3] + m[1][3] * other.m[3][3],
+    const float* bData = (const float*)&other.m;
+    __m128 rowB0 = _mm_loadu_ps(bData + 0);
+    __m128 rowB1 = _mm_loadu_ps(bData + 4);
+    __m128 rowB2 = _mm_loadu_ps(bData + 8);
+    __m128 rowB3 = _mm_loadu_ps(bData + 12);
 
-        m[2][0] * other.m[0][0] + m[2][1] * other.m[1][0] + m[2][2] * other.m[2][0] + m[2][3] * other.m[3][0],
-        m[2][0] * other.m[0][1] + m[2][1] * other.m[1][1] + m[2][2] * other.m[2][1] + m[2][3] * other.m[3][1],
-        m[2][0] * other.m[0][2] + m[2][1] * other.m[1][2] + m[2][2] * other.m[2][2] + m[2][3] * other.m[3][2],
-        m[2][0] * other.m[0][3] + m[2][1] * other.m[1][3] + m[2][2] * other.m[2][3] + m[2][3] * other.m[3][3],
+    const float* aData = (const float*)&this->m;
 
-        m[3][0] * other.m[0][0] + m[3][1] * other.m[1][0] + m[3][2] * other.m[2][0] + m[3][3] * other.m[3][0],
-        m[3][0] * other.m[0][1] + m[3][1] * other.m[1][1] + m[3][2] * other.m[2][1] + m[3][3] * other.m[3][1],
-        m[3][0] * other.m[0][2] + m[3][1] * other.m[1][2] + m[3][2] * other.m[2][2] + m[3][3] * other.m[3][2],
-        m[3][0] * other.m[0][3] + m[3][1] * other.m[1][3] + m[3][2] * other.m[2][3] + m[3][3] * other.m[3][3]
-    };
+    for (int i = 0; i < 4; ++i) {
+        int idx = i * 4;
+
+        __m128 vX = _mm_set1_ps(aData[idx + 0]);
+        __m128 vY = _mm_set1_ps(aData[idx + 1]);
+        __m128 vZ = _mm_set1_ps(aData[idx + 2]);
+        __m128 vW = _mm_set1_ps(aData[idx + 3]);
+
+        __m128 resRow = _mm_mul_ps(vX, rowB0);
+        resRow = _mm_add_ps(resRow, _mm_mul_ps(vY, rowB1));
+        resRow = _mm_add_ps(resRow, _mm_mul_ps(vZ, rowB2));
+        resRow = _mm_add_ps(resRow, _mm_mul_ps(vW, rowB3));
+
+        float* rData = (float*)&result.m;
+        _mm_storeu_ps(&rData[idx], resRow);
+    }
+
+    return result;
 }
 Vector4 Matrix4::operator*(const Vector4& v) const {
-    return Vector4{
-        m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z + m[0][3] * v.w,
-        m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z + m[1][3] * v.w,
-        m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z + m[2][3] * v.w,
-        m[3][0] * v.x + m[3][1] * v.y + m[3][2] * v.z + m[3][3] * v.w
-    };
+    __m128 vec = _mm_set_ps(v.w, v.z, v.y, v.x);
+
+    __m128 row0 = _mm_loadu_ps(m[0]);
+    __m128 row1 = _mm_loadu_ps(m[1]);
+    __m128 row2 = _mm_loadu_ps(m[2]);
+    __m128 row3 = _mm_loadu_ps(m[3]);
+
+    __m128 x_res = _mm_dp_ps(row0, vec, 0xF1);
+    __m128 y_res = _mm_dp_ps(row1, vec, 0xF2);
+    __m128 z_res = _mm_dp_ps(row2, vec, 0xF4);
+    __m128 w_res = _mm_dp_ps(row3, vec, 0xF8);
+
+    __m128 result = _mm_or_ps(_mm_or_ps(x_res, y_res), _mm_or_ps(z_res, w_res));
+
+    Vector4 out;
+    _mm_storeu_ps(&out.x, result);
+    return out;
 }
 std::string Matrix4::toString() const {
     return std::format("Matrix4{{ {{{}, {}, {}, {}}}, {{{}, {}, {}, {}}}, {{{}, {}, {}, {}}}, {{{}, {}, {}, {}}} }}",
@@ -302,7 +322,7 @@ std::string Matrix4::toString() const {
         m[2][0], m[2][1], m[2][2], m[2][3],
         m[3][0], m[3][1], m[3][2], m[3][3]);
 }
-Matrix4 Matrix4::translation(double tx, double ty, double tz) {
+Matrix4 Matrix4::translation(float tx, float ty, float tz) {
     return Matrix4{
         1, 0, 0, tx,
         0, 1, 0, ty,
@@ -310,7 +330,7 @@ Matrix4 Matrix4::translation(double tx, double ty, double tz) {
         0, 0, 0, 1
     };
 }
-Matrix4 Matrix4::rotationX(double angle) {
+Matrix4 Matrix4::rotationX(float angle) {
     return Matrix4{
         1, 0, 0, 0,
         0, std::cos(angle), -std::sin(angle), 0,
@@ -318,7 +338,7 @@ Matrix4 Matrix4::rotationX(double angle) {
         0, 0, 0, 1
     };
 }
-Matrix4 Matrix4::rotationY(double angle) {
+Matrix4 Matrix4::rotationY(float angle) {
     return Matrix4{
         std::cos(angle), 0, std::sin(angle), 0,
         0, 1, 0, 0,
@@ -326,7 +346,7 @@ Matrix4 Matrix4::rotationY(double angle) {
         0, 0, 0, 1
     };
 }
-Matrix4 Matrix4::rotationZ(double angle) {
+Matrix4 Matrix4::rotationZ(float angle) {
     return Matrix4{
         std::cos(angle), -std::sin(angle), 0, 0,
         std::sin(angle), std::cos(angle), 0, 0,
@@ -334,7 +354,7 @@ Matrix4 Matrix4::rotationZ(double angle) {
         0, 0, 0, 1
     };
 }
-Matrix4 Matrix4::scale(double sx, double sy, double sz) {
+Matrix4 Matrix4::scale(float sx, float sy, float sz) {
     return Matrix4{
         sx, 0, 0, 0,
         0, sy, 0, 0,
@@ -342,7 +362,7 @@ Matrix4 Matrix4::scale(double sx, double sy, double sz) {
         0, 0, 0, 1
     };
 }
-Matrix4 Matrix4::orthographic(double left, double right, double bottom, double top, double near, double far) {
+Matrix4 Matrix4::orthographic(float left, float right, float bottom, float top, float near, float far) {
     return Matrix4{
         2 / (right - left), 0, 0, -(right + left) / (right - left),
         0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom),
@@ -350,7 +370,7 @@ Matrix4 Matrix4::orthographic(double left, double right, double bottom, double t
         0, 0, 0, 1
     };
 }
-Matrix4 Matrix4::perspective(double fov, double aspect, double near, double far) {
+Matrix4 Matrix4::perspective(float fov, float aspect, float near, float far) {
     return Matrix4{
         1 / (aspect * std::tan(fov / 2)), 0, 0, 0,
         0, 1 / std::tan(fov / 2), 0, 0,
@@ -359,12 +379,12 @@ Matrix4 Matrix4::perspective(double fov, double aspect, double near, double far)
     };
 }
 
-double getAngle(const Vector2 &v1, const Vector2 &v2) {
-    double len1 = v1.length();
-    double len2 = v2.length();
+float getAngle(const Vector2 &v1, const Vector2 &v2) {
+    float len1 = v1.length();
+    float len2 = v2.length();
     if (len1 == 0.0 || len2 == 0.0) return 0.0;
 
-    double cosA = (v1 * v2) / (len1 * len2);
+    float cosA = (v1 * v2) / (len1 * len2);
 
     if (cosA < -1.0) cosA = -1.0;
     if (cosA > 1.0)  cosA = 1.0;
@@ -378,7 +398,7 @@ Vector3 getCross(const Vector3& v1, const Vector3& v2) {
         v1.x * v2.y - v1.y * v2.x
     };
 }
-double getMixedProduct(const Vector3& v1, const Vector3& v2, const Vector3& v3) {
+float getMixedProduct(const Vector3& v1, const Vector3& v2, const Vector3& v3) {
     return v1 * getCross(v2, v3);
 }
 Vector3 homogeneousNormalize(const Vector4& v) {
@@ -387,7 +407,7 @@ Vector3 homogeneousNormalize(const Vector4& v) {
     return Vector3{ v.x / v.w, v.y / v.w, v.z / v.w };
 }
 Vector3 normalize(const Vector3& v) {
-    double len = v.length();
+    float len = v.length();
     if (len == 0.0) return Vector3(0, 0, 0);
     return Vector3(v.x / len, v.y / len, v.z / len);
 }
