@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="PixelForge.vcxproj" Id="78cec6c1-6082-4342-b7fe-1b7032a3bd3d" />
+</Solution>
