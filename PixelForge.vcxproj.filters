@@ -36,6 +36,9 @@
     <ClCompile Include="window.cpp">
       <Filter>Source Files\arkin\test</Filter>
     </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>Source Files\arkin\pixel_forge</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pixel_forge.hpp">
@@ -47,5 +50,13 @@
     <ClInclude Include="window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\NovelEngine\resources\pictures\bedrock.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

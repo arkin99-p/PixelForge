@@ -147,12 +147,17 @@
     <ClCompile Include="test.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="pixel_forge.cpp" />
+    <ClCompile Include="texture.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="math.hpp" />
     <ClInclude Include="pixel_forge.hpp" />
+    <ClInclude Include="texture.hpp" />
     <ClInclude Include="window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\NovelEngine\resources\pictures\bedrock.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
