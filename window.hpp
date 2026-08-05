@@ -117,6 +117,7 @@ private:
     inline static Vector3 cameraPos{ 0.0f, 0.0f, 0.0f };    //!< Camera position
     inline static Vector3 cameraFront{ 0.0f, 0.0f, -1.0f }; //!< View direction (unit vector)
     inline static Vector3 cameraUp{ 0.0f, 1.0f, 0.0f };     //!< Up vector for the camera
+    inline static float angle = 0; // Current rotation angle (in radians) to animate the test square (verSqr)
 
     // ===================================================================
     // Resources
@@ -132,35 +133,35 @@ private:
      * @brief Vertex shader for textured objects.
      * Transforms vertex position to clip space and passes UV coordinates.
      */
-    static VertexOutput vertexShaderTex(const VertexInput& in);
+    static VertexOutput vertexShaderTex(const VertexInput& in, std::unordered_map<std::string, Uniform>& uniforms);
 
     /**
      * @brief Fragment shader for textured objects.
      * Samples the texture at the UV coordinates and returns the color.
      */
-    static Vector4 fragmentShaderTex(const FragmentInput& in);
+    static Vector4 fragmentShaderTex(const FragmentInput& in, std::unordered_map<std::string, Uniform>& uniforms);
 
 
     /**
      * @brief Vertex shader for colored objects with alpha (transparent).
      * Passes the vertex color.
      */
-    static VertexOutput vertexShaderColorA(const VertexInput& in);
+    static VertexOutput vertexShaderColorA(const VertexInput& in, std::unordered_map<std::string, Uniform>& uniforms);
     /**
      * @brief Fragment shader for transparent colored objects.
      * Multiplies the alpha channel of the color by 0.5 to create transparency.
      */
-    static Vector4 fragmentShaderColorA(const FragmentInput& in);
+    static Vector4 fragmentShaderColorA(const FragmentInput& in, std::unordered_map<std::string, Uniform>& uniforms);
 
     /**
      * @brief Vertex shader for fully opaque colored objects.
      * Passes the vertex color.
      */
-    static VertexOutput vertexShaderColor(const VertexInput& in);
+    static VertexOutput vertexShaderColor(const VertexInput& in, std::unordered_map<std::string, Uniform>& uniforms);
 
     /**
      * @brief Fragment shader for fully opaque colored objects.
      * Returns the color unchanged.
      */
-    static Vector4 fragmentShaderColor(const FragmentInput& in);
+    static Vector4 fragmentShaderColor(const FragmentInput& in, std::unordered_map<std::string, Uniform>& uniforms);
 };

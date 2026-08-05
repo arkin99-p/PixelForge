@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <variant>
 #include <SDL3/SDL.h>
 #include "math.hpp"
 #include "texture.hpp"
@@ -11,6 +12,16 @@ struct XY {
     int x;
     int y;
 };
+
+/**
+ * @brief A uniform value that can hold one of several supported types.
+ *
+ * Uniforms are global shader variables that remain constant for a draw call.
+ * They can store scalars (float, int), vectors (Vector2/3/4), matrices (Matrix3/4),
+ * or a Texture object. This allows flexible parameter passing to shaders without
+ * changing their function signatures.
+ */
+typedef std::variant<float, int, Vector2, Vector3, Vector4, Matrix3, Matrix4, Texture> Uniform;
 
 /**
  * @brief Type of vertex attribute.
@@ -126,15 +137,34 @@ public:
 
     /**
      * @brief Sets the vertex shader function.
-     * @param vs Callable that transforms a vertex from local to clip space.
+     * @param vs Callable that takes a VertexInput and a reference to the uniform map,
+     *           and returns a VertexOutput (clip-space position).
+     * @note The second parameter is a mutable reference to the uniform dictionary,
+     *       allowing the shader to access uniform values (matrices, textures, etc.) at runtime.
      */
-    void setVertexShader(std::function<VertexOutput(const VertexInput&)> vs);
+    void setVertexShader(std::function<VertexOutput(const VertexInput&, std::unordered_map<std::string, Uniform>& uniforms)> vs);
 
     /**
      * @brief Sets the fragment shader function.
-     * @param fs Callable that computes the final color of a fragment.
+     * @param fs Callable that takes a FragmentInput and a reference to the uniform map,
+     *           and returns a Vector4 (pixel color).
+     * @note Similar to the vertex shader, it gains access to uniforms via the map.
      */
-    void setFragmentShader(std::function<Vector4(const FragmentInput&)> fs);
+    void setFragmentShader(std::function<Vector4(const FragmentInput&, std::unordered_map<std::string, Uniform>& uniforms)> fs);
+
+    /**
+     * @brief Sets a uniform value by name.
+     * @param name The uniform name (string key).
+     * @param value The uniform value (a variant of supported types).
+     * @note If a uniform with the same name already exists, it is overwritten.
+     */
+    void setUniform(const std::string& name, Uniform value);
+
+    /**
+    * @brief Removes a uniform by name.
+    * @param name The uniform name to remove.
+    */
+    void clearUniform(const std::string& name);
 
     /**
      * @brief Enables or disables Z-buffer writes for subsequent draw calls.
@@ -304,8 +334,10 @@ private:
 
     bool hasAVX;                    //!< Flag indicating whether AVX is supported.
 
-    std::function<VertexOutput(const VertexInput&)> vertexShader = nullptr; // !< Current vertex shader.
-    std::function<Vector4(const FragmentInput&)> fragmentShader = nullptr;  //!< Current fragment shader.
+    std::function<VertexOutput(const VertexInput&, std::unordered_map<std::string, Uniform>& uniforms)> vertexShader = nullptr; // !< Current vertex shader.
+    std::function<Vector4(const FragmentInput&, std::unordered_map<std::string, Uniform>& uniforms)> fragmentShader = nullptr;  //!< Current fragment shader.
+
+    std::unordered_map<std::string, Uniform> uniforms;
 };
 
 /**
@@ -315,3 +347,23 @@ private:
  * @return true if the mesh was found and removed, false otherwise.
  */
 bool removeMesh(std::vector<MeshData*> &meshes, const MeshData&mesh);
+
+/**
+ * @brief Template function to retrieve a uniform value by name.
+ * @tparam T The expected type (must be one of the types stored in Uniform).
+ * @param name The uniform name.
+ * @param uniforms Reference to the uniform dictionary.
+ * @return The value of type T if found, otherwise T{} (default-constructed).
+ * @note This function is defined inline in the header so it is visible wherever shaders are used.
+ *       It uses std::get_if for safe extraction.
+ */
+template<typename T>
+inline T getUniform(const std::string& name, std::unordered_map<std::string, Uniform>& uniforms) {
+    const auto it = uniforms.find(name);
+    if (it != uniforms.end()) {
+        if (const auto* val = std::get_if<T>(&it->second)) {
+            return *val;
+        }
+    }
+    return T{};
+}

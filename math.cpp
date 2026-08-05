@@ -1,5 +1,5 @@
-#include <cmath>
 #include <format>
+#include <algorithm>
 #include <xmmintrin.h>
 #include <smmintrin.h>
 #include "math.hpp"
@@ -447,6 +447,108 @@ Matrix4 Matrix4::perspective(float fov, float aspect, float near, float far) {
     };
 }
 
+// === Quaternion ===
+
+Quaternion::Quaternion(float x = 0, float y = 0, float z = 0, float w = 1) : x(x), y(y), z(z), w(w) {}
+
+void Quaternion::norm() {
+    float len = length();
+    if (len > 0) {
+        x /= len;
+        y /= len;
+        z /= len;
+        w /= len;
+    }
+}
+float Quaternion::length() const {
+    return std::sqrt(x * x + y * y + z * z + w * w);
+}
+Quaternion Quaternion::conjugate() const {
+    return Quaternion{-x, -y, -z, w};
+}
+Quaternion Quaternion::inverse() const {
+    return conjugate() / pow(length(), 2);
+}
+Matrix4 Quaternion::toMatrix4() const {
+    return Matrix4{
+        1 - 2 * y * y - 2 * z * z, 2 * x * y - 2 * z * w, 2 * x * z + 2 * y * w, 0,
+        2 * x * y + 2 * z * w, 1 - 2 * x * x - 2 * z * z, 2 * y * z - 2 * x * w, 0,
+        2 * x * z - 2 * y * w, 2 * y * z + 2 * x * w, 1 - 2 * x * x - 2 * y * y, 0,
+        0, 0, 0, 1
+    };
+}
+
+Quaternion Quaternion::operator*(const Quaternion& other) const {
+    return Quaternion(
+        w * other.x + x * other.w + y * other.z - z * other.y,
+        w * other.y + y * other.w + z * other.x - x * other.z,
+        w * other.z + z * other.w + x * other.y - y * other.x,
+        w * other.w - x * other.x - y * other.y - z * other.z
+    );
+}
+Quaternion Quaternion::operator*(float scalar) const {
+    return Quaternion(x * scalar, y * scalar, z * scalar, w * scalar);
+}
+Quaternion Quaternion::operator/(float scalar) const {
+    return Quaternion(x / scalar, y / scalar, z / scalar, w / scalar);
+}
+void Quaternion::operator*=(float scalar) {
+    x *= scalar;
+    y *= scalar;
+    z *= scalar;
+    w *= scalar;
+}
+void Quaternion::operator/=(float scalar) {
+    x /= scalar;
+    y /= scalar;
+    z /= scalar;
+    w /= scalar;
+}
+
+Quaternion Quaternion::fromAxisAngle(const Vector3& axis, float angle) {
+    Vector3 normAxis = normalize(axis);
+    float halfAngle = angle * 0.5f;
+    float s = std::sin(halfAngle);
+    float c = std::cos(halfAngle);
+    return Quaternion(normAxis.x * s, normAxis.y * s, normAxis.z * s, c);
+}
+Quaternion Quaternion::slerp(const Quaternion& a, const Quaternion& b, float t) {
+    Quaternion qa = normalize(a);
+    Quaternion qb = normalize(b);
+
+    float cosAngle = qa.x * qb.x + qa.y * qb.y + qa.z * qb.z + qa.w * qb.w;
+
+    if (cosAngle < 0.0f) {
+        qb = Quaternion(-qb.x, -qb.y, -qb.z, -qb.w);
+        cosAngle = -cosAngle;
+    }
+
+    float angle = std::acos(std::clamp(cosAngle, -1.0f, 1.0f));
+    float sinAngle = std::sin(angle);
+
+    if (sinAngle < 1e-6f) {
+        Quaternion result(
+            (1.0f - t) * qa.x + t * qb.x,
+            (1.0f - t) * qa.y + t * qb.y,
+            (1.0f - t) * qa.z + t * qb.z,
+            (1.0f - t) * qa.w + t * qb.w
+        );
+        return normalize(result);
+    }
+
+    float coef1 = std::sin((1.0f - t) * angle) / sinAngle;
+    float coef2 = std::sin(t * angle) / sinAngle;
+
+    Quaternion result(
+        coef1 * qa.x + coef2 * qb.x,
+        coef1 * qa.y + coef2 * qb.y,
+        coef1 * qa.z + coef2 * qb.z,
+        coef1 * qa.w + coef2 * qb.w
+    );
+
+    return normalize(result);
+}
+
 // === Methods ===
 
 float radians(float angle) {
@@ -470,11 +572,8 @@ Vector3 homogeneousNormalize(const Vector4& v) {
 }
 Vector3 normalize(Vector3 vec) {
     float len = vec.length();
-    if (len > 0) {
-        vec.x /= len;
-        vec.y /= len;
-        vec.z /= len;
-    }
+    if (len > 0)
+        vec /= len;
     return vec;
 }
 // Builds a look-at matrix for the camera.
@@ -496,4 +595,10 @@ Matrix4 lookAt(Vector3& pos, Vector3& target, Vector3& up) {
     matrix.m[3][0] = 0.0f;        matrix.m[3][1] = 0.0f;        matrix.m[3][2] = 0.0f;        matrix.m[3][3] = 1.0f;
 
     return matrix;
+}
+Quaternion normalize(Quaternion quat) {
+    float len = quat.length();
+    if (len > 0)
+        quat /= len;
+    return quat;
 }

@@ -43,6 +43,17 @@ static float verTex[] = {
         0.0, -1.0, -2,   0,2
 };
 
+// Test square (two triangles) to test quaternion rotation.
+static float verSqr[] = {
+        0.0, 0.0, 0,   1,0,0,
+        1.0, 0.0, 0,   0,1,0,
+        0.0, -1.0, 0,   0,1,0,
+
+        1.0, -1.0, 0,   0,0,1,
+        1.0, 0.0, 0,   0,1,0,
+        0.0, -1.0, 0,   0,1,0
+};
+
 // verColor: a single colored triangle.
 static float verColor[] = {
         0.5, 1.0, 2,   0,0,1,
@@ -93,17 +104,18 @@ void Window::resize() {
     setViewport(start, end);
 }
 void Window::update(double delta) {
+    angle += 3 * (float)delta;
     float speed = 3 * (float)delta;
 
     // Movement forward/backward along horizontal projection of cameraFront
     Vector3 fw = Vector3{ cameraFront.x, 0, cameraFront.z };
     fw.norm(); // normalize to keep speed consistent
-    if (keys & 1) cameraPos = cameraPos + speed * fw; // W
-    if (keys & 4) cameraPos = cameraPos - speed * fw; // S
-    if (keys & 2) cameraPos = cameraPos - normalize(getCross(cameraFront, cameraUp)) * speed; // A
-    if (keys & 8) cameraPos = cameraPos + normalize(getCross(cameraFront, cameraUp)) * speed; // D
-    if (keys & 16) cameraPos = cameraPos + cameraUp * speed; // Space (up)
-    if (keys & 32) cameraPos = cameraPos - cameraUp * speed; // Shift (down)
+    if (keys & 1) cameraPos += speed * fw; // W
+    if (keys & 4) cameraPos -= speed * fw; // S
+    if (keys & 2) cameraPos -= normalize(getCross(cameraFront, cameraUp)) * speed; // A
+    if (keys & 8) cameraPos += normalize(getCross(cameraFront, cameraUp)) * speed; // D
+    if (keys & 16) cameraPos += cameraUp * speed; // Space (up)
+    if (keys & 32) cameraPos -= cameraUp * speed; // Shift (down)
 
     // Recompute view matrix: look from camera position toward (position + front direction)
     Vector3 front = cameraPos + cameraFront;
@@ -117,12 +129,17 @@ void Window::render() {
     setOpaqueRender(true);
     setVertexShader(vertexShaderTex);
     setFragmentShader(fragmentShaderTex);
+    setUniform("texture", texture);
     drawTriangles(verTex, 6, tex);
+    clearUniform("texture");
 
     // Opaque colored object
     setVertexShader(vertexShaderColor);
     setFragmentShader(fragmentShaderColor);
     drawTriangles(verColor, 3, color);
+    setUniform("matrix", Matrix4::translation(2, 0, 0) * Quaternion::fromAxisAngle(Vector3{ 0, 0, 1 }, angle).toMatrix4());
+    drawTriangles(verSqr, 6, color);
+    clearUniform("matrix");
 
     // Transparent objects (with alpha blending) – sorted by depth
     setOpaqueRender(false);
@@ -204,14 +221,14 @@ void Window::mouseMove(float x, float y) {
 // Shader implementations (transform and color/texture calculations)
 // ===================================================================
 
-VertexOutput Window::vertexShaderTex(const VertexInput& in) {
+VertexOutput Window::vertexShaderTex(const VertexInput& in, std::unordered_map<std::string, Uniform>& uniforms) {
     VertexOutput out;
     out.position = projection * view * model * Vector4(in.position);
     out.uv = in.uv;
     return out;
 }
-Vector4 Window::fragmentShaderTex(const FragmentInput& in) {
-    uint32_t texColor = texture.sample(in.uv.x, in.uv.y);
+Vector4 Window::fragmentShaderTex(const FragmentInput& in, std::unordered_map<std::string, Uniform>& uniforms) {
+    uint32_t texColor = getUniform<Texture>("texture", uniforms).sample(in.uv.x, in.uv.y);
 
     float a = ((texColor >> 24) & 0xFF) / 255.0f;
     float r = ((texColor >> 16) & 0xFF) / 255.0f;
@@ -220,22 +237,24 @@ Vector4 Window::fragmentShaderTex(const FragmentInput& in) {
 
     return Vector4{ r, g, b, a };
 }
-VertexOutput Window::vertexShaderColorA(const VertexInput& in) {
+VertexOutput Window::vertexShaderColorA(const VertexInput& in, std::unordered_map<std::string, Uniform>& uniforms) {
     VertexOutput out;
     out.position = projection * view * model * Vector4(in.position);
     out.color = in.color;
     return out;
 }
-Vector4 Window::fragmentShaderColorA(const FragmentInput& in) {
+Vector4 Window::fragmentShaderColorA(const FragmentInput& in, std::unordered_map<std::string, Uniform>& uniforms) {
     float alpha = in.color.w * 0.5;
     return Vector4{ in.color.x, in.color.y, in.color.z, alpha };
 }
-VertexOutput Window::vertexShaderColor(const VertexInput& in) {
+VertexOutput Window::vertexShaderColor(const VertexInput& in, std::unordered_map<std::string, Uniform>& uniforms) {
+    Matrix4 transPos = getUniform<Matrix4>("matrix", uniforms);
+
     VertexOutput out;
-    out.position = projection * view * model * Vector4(in.position);
+    out.position = projection * view * transPos * Vector4(in.position);
     out.color = in.color;
     return out;
 }
-Vector4 Window::fragmentShaderColor(const FragmentInput& in) {
+Vector4 Window::fragmentShaderColor(const FragmentInput& in, std::unordered_map<std::string, Uniform>& uniforms) {
     return in.color;
 }

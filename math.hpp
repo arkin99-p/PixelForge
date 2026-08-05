@@ -216,6 +216,15 @@ public:
     float length() const noexcept;
 
     /**
+     * @brief Returns the x and y components as a 2D vector.
+     * @return A Vector2 containing (x, y).
+     * @note This is a non‑mutating getter; the original vector remains unchanged.
+     */
+    Vector2 xy() {
+        return Vector2{ x, y };
+    }
+
+    /**
      * @brief Returns a string representation of the vector.
      * @return A string like "Vector3{x: ..., y: ..., z: ...}".
      */
@@ -366,6 +375,24 @@ public:
      * @return The length of a vector.
      */
     float length() const noexcept;
+
+    /**
+     * @brief Returns the x and y components as a 2D vector.
+     * @return A new Vector2 containing (x, y).
+     * @note The original vector is not modified.
+     */
+    Vector2 xy() {
+        return Vector2(x, y);
+    }
+
+    /**
+     * @brief Returns the x, y and z components as a 3D vector.
+     * @return A new Vector3 containing (x, y, z).
+     * @note The original vector is not modified; the w component is discarded.
+     */
+    Vector3 xyz() {
+        return Vector3(x, y, z);
+    }
 
     /**
      * @brief Returns a string representation of the vector.
@@ -745,6 +772,152 @@ public:
 };
 
 /**
+ * @brief Represents a quaternion for 3D rotations and orientations.
+ *
+ * Quaternions are used to represent rotations in 3D space without the
+ * problems of gimbal lock. They are stored as (x, y, z, w) where w is the
+ * real part and (x, y, z) are the imaginary parts.
+ *
+ * This class provides basic operations: normalization, length,
+ * conversion to a 4x4 rotation matrix, application to vectors,
+ * multiplication, and creation from axis‑angle representation.
+ *
+ * @note The class is intended for use in 3D graphics and physics.
+ *       All angles are in radians.
+ */
+class Quaternion {
+public:
+    /**
+     * @brief Imaginary part (x component).
+     */
+    float x;
+    /**
+     * @brief Imaginary part (y component).
+     */
+    float y;
+    /**
+     * @brief Imaginary part (z component).
+     */
+    float z;
+    /**
+     * @brief Real part (w component).
+     */
+    float w;
+
+    /**
+     * @brief Default constructor. Creates an identity quaternion (0,0,0,1).
+     * @param x Imaginary x component (default 0).
+     * @param y Imaginary y component (default 0).
+     * @param z Imaginary z component (default 0).
+     * @param w Real component (default 1).
+     */
+    Quaternion(float x, float y, float z, float w);
+
+    // === Mutator methods ===
+
+    /**
+     * @brief Normalises this quaternion to unit length.
+     * @note If the length is zero, the quaternion remains unchanged.
+     */
+    void norm();
+
+    // === Non-mutator methods ===
+
+    /**
+     * @brief Computes the length (magnitude) of the quaternion.
+     * @return The length.
+     */
+    float length() const;
+
+    /**
+     * @brief Returns the conjugate of this quaternion.
+     * @return A new quaternion with negated imaginary parts (x,y,z).
+     * @note The conjugate represents the opposite rotation for unit quaternions.
+     */
+    Quaternion conjugate() const;
+
+    /**
+     * @brief Returns the inverse of this quaternion.
+     * @return A new quaternion that, when multiplied by the original, yields the identity.
+     * @note For unit quaternions, this is the same as conjugate().
+     *       For non‑unit quaternions, the result is divided by the squared length.
+     */
+    Quaternion inverse() const;
+
+    /**
+     * @brief Converts this quaternion to a 4x4 rotation matrix.
+     * @return A 4x4 matrix representing the same rotation.
+     * @note The matrix is in row‑major order and can be used with Matrix4.
+     */
+    Matrix4 toMatrix4() const;
+
+    // === Operators ===
+
+    /**
+     * @brief Multiplies two quaternions (composition of rotations).
+     * @param other The quaternion to multiply on the right.
+     * @return The resulting quaternion (this * other).
+     * @note Quaternion multiplication is not commutative.
+     */
+    Quaternion operator*(const Quaternion& other) const;
+
+    /**
+    * @brief Multiplies this quaternion by a scalar (scale all components).
+     * @param scalar The scaling factor.
+     * @return A new quaternion with all components multiplied by scalar.
+     */
+    Quaternion operator*(float scalar) const;
+
+    /**
+     * @brief Divides this quaternion by a scalar.
+     * @param scalar The divisor (must not be zero).
+     * @return A new quaternion with all components divided by scalar.
+     */
+    Quaternion operator/(float scalar) const;
+
+    /**
+     * @brief In‑place multiplication by a scalar.
+     * @param scalar The scaling factor.
+     */
+    void operator*=(float scalar);
+
+    /**
+     * @brief In‑place division by a scalar.
+     * @param scalar The divisor (must not be zero).
+     */
+    void operator/=(float scalar);
+
+    // === Static factory methods ===
+
+    /**
+     * @brief Creates a quaternion from an axis and an angle.
+     * @param axis The axis of rotation (does not need to be normalised).
+     * @param angle The rotation angle in radians.
+     * @return The corresponding unit quaternion.
+     * @note The axis is normalised internally.
+     */
+    static Quaternion fromAxisAngle(const Vector3& axis, float angle);
+
+    /**
+     * @brief Spherical linear interpolation (slerp) between two quaternions.
+     * @param a Start quaternion.
+     * @param b End quaternion.
+     * @param t Interpolation factor in [0,1].
+     * @return The interpolated quaternion.
+     * @note Assumes both quaternions are unit and takes the shortest path.
+     */
+    static Quaternion slerp(const Quaternion& a, const Quaternion& b, float t);
+};
+/**
+* @brief Multiplies this quaternion by a scalar (scale all components).
+* @param scalar The scaling factor.
+* @return A new quaternion with all components multiplied by scalar.
+*/
+inline Quaternion operator*(float factor, const Quaternion& quat) {
+    return quat * factor;
+}
+
+/**
  * @brief Converts an angle from degrees to radians.
  * @param angle Angle in degrees.
  * @return Angle in radians.
@@ -786,7 +959,7 @@ Vector3 homogeneousNormalize(const Vector4& v);
  * @return Normalized vector (length == 1). If length is zero, returns a zero vector.
  * @note This function does not modify the input; it returns a new vector.
  */
-Vector3 normalize(Vector3);
+Vector3 normalize(Vector3 v);
 
 // === Matrix functions ===
 
@@ -798,3 +971,15 @@ Vector3 normalize(Vector3);
  * @return 4x4 view matrix that transforms world space to view space.
  */
 Matrix4 lookAt(Vector3 &pos, Vector3 &target, Vector3 &up);
+
+// === Quaternion functions ===
+
+/**
+ * @brief Normalizes a quaternion to unit length.
+ * @param quat The quaternion to normalize.
+ * @return A new quaternion with length = 1. If the length is zero,
+ *         returns the identity quaternion (0, 0, 0, 1).
+ * @note This function does not modify the input; it returns a copy.
+ *       It is the non‑mutating counterpart of Quaternion::norm().
+ */
+Quaternion normalize(Quaternion quat);

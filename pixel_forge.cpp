@@ -99,11 +99,19 @@ void PixelForge::run() {
 // Shader Management
 // =====================================================================
 
-void PixelForge::setVertexShader(std::function<VertexOutput(const VertexInput&)> vs) {
+void PixelForge::setVertexShader(std::function<VertexOutput(const VertexInput&, 
+                                std::unordered_map<std::string, Uniform>& uniforms)> vs) {
     vertexShader = vs;
 }
-void PixelForge::setFragmentShader(std::function<Vector4(const FragmentInput&)> fs) {
+void PixelForge::setFragmentShader(std::function<Vector4(const FragmentInput&, 
+                                std::unordered_map<std::string, Uniform>& uniforms)> fs) {
     fragmentShader = fs;
+}
+void PixelForge::setUniform(const std::string& name, Uniform value) {
+    uniforms[name] = value;
+}
+void PixelForge::clearUniform(const std::string& name) {
+    uniforms.erase(name);
 }
 void PixelForge::setOpaqueRender(bool opaque) {
     isOpaqueRender = opaque;
@@ -351,7 +359,7 @@ void PixelForge::drawTriangles(const float* vertices, int vertexCount, const Ver
                 }
             }
 
-            v[j] = vertexShader(in);
+            v[j] = vertexShader(in, this->uniforms);
         }
 
         if (this->hasAVX)
@@ -640,7 +648,7 @@ void PixelForge::rasterizeTriangleSSE(const VertexOutput& v0, const VertexOutput
                         + w2 * (s2.uv / s2.position.w);
                     frag.uv = perspectiveUV / invW;
 
-                    Vector4 color = fragmentShader(frag);
+                    Vector4 color = fragmentShader(frag, this->uniforms);
                     uint32_t dstPixel = ((uint32_t*)surface->pixels)[idx];
                     uint8_t srcA = (uint8_t)(color.w * 255);
 
@@ -736,7 +744,7 @@ void PixelForge::rasterizeTriangleSSE(const VertexOutput& v0, const VertexOutput
                     + tw2 * (s2.uv / s2.position.w);
                 frag.uv = perspectiveUV / invW;
                 
-                Vector4 color = fragmentShader(frag);
+                Vector4 color = fragmentShader(frag, this->uniforms);
                 
                 uint32_t dstPixel = ((uint32_t*)surface->pixels)[idx];
                 uint8_t srcA = (uint8_t)(color.w * 255);
@@ -878,7 +886,7 @@ void PixelForge::rasterizeTriangleAVX(const VertexOutput& v0, const VertexOutput
                         + w2 * (s2.uv / s2.position.w);
                     frag.uv = perspectiveUV / invW;
 
-                    Vector4 color = fragmentShader(frag);
+                    Vector4 color = fragmentShader(frag, this->uniforms);
                     uint32_t dstPixel = ((uint32_t*)surface->pixels)[idx];
                     uint8_t srcA = (uint8_t)(color.w * 255);
 
@@ -994,7 +1002,7 @@ void PixelForge::rasterizeTriangleAVX(const VertexOutput& v0, const VertexOutput
                     + tw2 * (s2.uv / s2.position.w);
                 frag.uv = perspectiveUV / invW;
 
-                Vector4 color = fragmentShader(frag);
+                Vector4 color = fragmentShader(frag, this->uniforms);
 
                 uint32_t dstPixel = ((uint32_t*)surface->pixels)[idx];
                 uint8_t srcA = (uint8_t)(color.w * 255);
