@@ -1,0 +1,8 @@
+add_executable(PixelForge_demo
+    main.cpp
+    window.cpp
+)
+
+target_link_libraries(PixelForge_demo PRIVATE PixelForge)
+
+file(COPY ${CMAKE_SOURCE_DIR}/resources/ DESTINATION ${CMAKE_BINARY_DIR}/resources)

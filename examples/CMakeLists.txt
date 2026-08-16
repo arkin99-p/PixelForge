@@ -1,0 +1,5 @@
+add_subdirectory(minimal)
+add_subdirectory(rotated)
+add_subdirectory(textured)
+add_subdirectory(transparent)
+add_subdirectory(demo)

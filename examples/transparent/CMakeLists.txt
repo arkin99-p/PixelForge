@@ -1,0 +1,3 @@
+add_executable(PixelForge_transparent main.cpp)
+
+target_link_libraries(PixelForge_transparent PRIVATE PixelForge)
