@@ -219,8 +219,8 @@ public:
     void setCursorVisible(bool visible);
 
     XY getWindowPosition();
-    inline int getWidth();
-    inline int getHeight();
+    int getWidth();
+    int getHeight();
     int getGWidth();
     int getGHeight();
     int getActiveMonitorId();
