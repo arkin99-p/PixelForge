@@ -23,12 +23,16 @@ jobs:
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev \
             libdrm-dev libgbm-dev
 
-      - name: Build and install SDL3 from source
+      - name: Build and install SDL3 from source with disabled X11 screen saver
         run: |
           git clone --depth 1 https://github.com/libsdl-org/SDL.git
           cd SDL
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release \
+                   -DSDL_X11_XSCRNSAVER=OFF \
+                   -DSDL_X11_XSHAPE=OFF \
+                   -DSDL_X11_XSYNC=OFF \
+                   -DSDL_X11_XTEST=OFF
           sudo make install -j$(nproc)
           sudo ldconfig
 
