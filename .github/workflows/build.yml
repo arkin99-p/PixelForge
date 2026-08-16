@@ -21,7 +21,8 @@ jobs:
             libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
             libxcursor-dev libxi-dev libgl1-mesa-dev \
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev \
-            libdrm-dev libgbm-dev
+            libdrm-dev libgbm-dev \
+            libstb-dev   # <-- добавлено
 
       - name: Build and install SDL3 from source with disabled X11 screen saver
         run: |
