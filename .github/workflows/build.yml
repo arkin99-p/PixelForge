@@ -14,21 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies (CMake, build tools)
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ make wget
-
-      - name: Download and install SDL3 from official .deb package
-        run: |
-          SDL_VERSION="3.2.0"
-          SDL_DEB="libsdl3-dev_${SDL_VERSION}-1_amd64.deb"
-          SDL_DEB_URL="https://github.com/libsdl-org/SDL/releases/download/release-${SDL_VERSION}/${SDL_DEB}"
-          
-          wget -O /tmp/${SDL_DEB} ${SDL_DEB_URL}
-          sudo dpkg -i /tmp/${SDL_DEB} || sudo apt-get install -f -y
-
-          ldconfig -p | grep SDL3
+          sudo apt-get install -y cmake g++ make libsdl3-dev
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
