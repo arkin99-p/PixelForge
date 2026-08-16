@@ -1,5 +1,6 @@
 #include <format>
 #include <cmath>
+#include <algorithm>
 #include <xmmintrin.h>
 #include <smmintrin.h>
 #include "math.hpp"
