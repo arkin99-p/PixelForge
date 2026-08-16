@@ -14,10 +14,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies for SDL3 and build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ make libsdl3-dev
+          sudo apt-get install -y cmake g++ make git \
+            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libgl1-mesa-dev \
+            libwayland-dev libxkbcommon-dev libegl1-mesa-dev \
+            libdrm-dev libgbm-dev
+
+      - name: Build and install SDL3 from source
+        run: |
+          git clone --depth 1 https://github.com/libsdl-org/SDL.git
+          cd SDL
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          sudo make install -j$(nproc)
+          sudo ldconfig
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
