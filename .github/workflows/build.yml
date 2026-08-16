@@ -17,16 +17,18 @@ jobs:
       - name: Install dependencies (CMake, build tools)
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ make
+          sudo apt-get install -y cmake g++ make wget
 
-      - name: Build and install SDL3 from source
+      - name: Download and install SDL3 from official .deb package
         run: |
-          git clone --depth 1 https://github.com/libsdl-org/SDL.git
-          cd SDL
-          mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
-          sudo make install -j$(nproc)
-          sudo ldconfig
+          SDL_VERSION="3.2.0"
+          SDL_DEB="libsdl3-dev_${SDL_VERSION}-1_amd64.deb"
+          SDL_DEB_URL="https://github.com/libsdl-org/SDL/releases/download/release-${SDL_VERSION}/${SDL_DEB}"
+          
+          wget -O /tmp/${SDL_DEB} ${SDL_DEB_URL}
+          sudo dpkg -i /tmp/${SDL_DEB} || sudo apt-get install -f -y
+
+          ldconfig -p | grep SDL3
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
